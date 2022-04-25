@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -23,18 +24,20 @@ func main() {
 		exit("Failed to parse the privided CSV file")
 	}
 	problems := parseLines(lines)
-	
+
+	timer := time.NewTimer(time.Duration(*timeLimit) * time.Second)
+	<-timer.C
 	score := 0
 	for i, p := range problems {
 		fmt.Printf("Problem #%d: %s = \n", i+1, p.q)
 		var answer string
 		fmt.Scanf("%s\n", &answer)
 		if answer == p.a {
-			fmt.Printf("Correct Answer! \n Incrementing Score\n")
+			fmt.Printf("Correct Answer! \nIncrementing Score\n")
 			score++
 		}
 		if answer != p.a {
-			fmt.Printf("Incorrect Answer!! \n Deducting From Score\n")
+			fmt.Printf("Incorrect Answer!! \nDeducting From Score\n")
 			score--
 		}
 	}
