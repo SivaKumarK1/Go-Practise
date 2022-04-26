@@ -27,10 +27,13 @@ func main() {
 		exit("Failed to parse the privided CSV file")
 	}
 	problems := parseLines(lines)
+	score := showQues(problems,*timeLimit)
+	fmt.Printf("Your Score is : %d\n", score)
+}
 
-	timer := time.NewTimer(time.Duration(*timeLimit) * time.Second)
-	
+func showQues(problems []problem, timeLimit int) int {
 	score := 0
+	timer := time.NewTimer(time.Duration(timeLimit) * time.Second)
 problemloop:
 	for i, p := range problems {
 		fmt.Printf("Problem #%d: %s = ", i+1, p.q)
@@ -55,7 +58,7 @@ problemloop:
 		
 		}
 	}
-	fmt.Printf("Your Score is : %d\n", score)
+	return score
 }
 
 func parseLines(lines [][]string) []problem {
