@@ -14,6 +14,7 @@ func main() {
 	timeLimit := flag.Int("limit",30, "the time limit for the quiz in seconds")
 	flag.Parse()
 	file, err := os.Open(*csvFile)
+	defer file.Close()
 	if err != nil {
 		exit(fmt.Sprintf("Failed to open CSV file: %s\n", *csvFile))
 		os.Exit(1)
@@ -26,19 +27,30 @@ func main() {
 	problems := parseLines(lines)
 
 	timer := time.NewTimer(time.Duration(*timeLimit) * time.Second)
-	<-timer.C
+	
 	score := 0
+problemloop:
 	for i, p := range problems {
-		fmt.Printf("Problem #%d: %s = \n", i+1, p.q)
-		var answer string
-		fmt.Scanf("%s\n", &answer)
-		if answer == p.a {
-			fmt.Printf("Correct Answer! \nIncrementing Score\n")
-			score++
-		}
-		if answer != p.a {
-			fmt.Printf("Incorrect Answer!! \nDeducting From Score\n")
-			score--
+		fmt.Printf("Problem #%d: %s = ", i+1, p.q)
+		answerCh := make(chan string)
+		go func()  {
+			var answer string
+			fmt.Scanf("%s\n", &answer)
+			answerCh<-answer
+		}()
+		select {
+		case <-timer.C:
+			fmt.Println()
+			break problemloop
+		case answer := <-answerCh:
+			if answer == p.a {	
+				score++
+			}
+			if answer != p.a {
+				fmt.Printf("Incorrect Answer!! \nDeducting From Score\n")
+				score--
+			}
+		
 		}
 	}
 	fmt.Printf("Your Score is : %d\n", score)
